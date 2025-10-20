@@ -41,18 +41,52 @@ public class RestApiCarController {
     /**
      * GET /api/cars
      *
-     * @return возвращает список всех автомобилей
+     * @return список всех автомобилей
      */
     // GET --> api/cars
+    @Operation(
+            summary = "Get cars",
+            description = "Returns a list of all cars",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Successful")
+            }
+    )
     @GetMapping
     Iterable<Car> getCars() {
         return cars;
     }
 
     /**
+     * GET /api/cars/color/{color}
+     *
+     * @return список всех автомобилей заданного цвета
+     */
+    @Operation(
+            summary = "Get cars by color",
+            description = "Returns a list of cars filtered by color",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Found"),
+                    @ApiResponse(responseCode = "404", description = "Not found")
+            }
+    )
+    @GetMapping("/color/{color}")
+    ResponseEntity<List<Car>> getCarsByColor(@PathVariable String color) {
+        List<Car> filteredCars = cars.stream()
+                .filter(car -> car.getColor().equalsIgnoreCase(color))
+                .toList();
+        if (filteredCars.isEmpty()) {
+            log.warn("Code 404 - No cars found for color {}", color);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            log.info("Code 200 - Cars found for color {}", color);
+            return new ResponseEntity<>(filteredCars, HttpStatus.OK);
+        }
+    }
+
+    /**
      * Создает новый автомобиль и добавляет его в лист
      *
-     * @param car
+     * @param car данные для новой машины
      * @return созданный автомобиль
      */
     @Operation(
@@ -65,22 +99,29 @@ public class RestApiCarController {
     @PostMapping
     Car postCar(@RequestBody Car car) {
         if (car.getId() <= 0) {
-            log.error("Car ID must be greater than 0");
-            Car errorCar = new Car(9999, "000", "000", 9999);
-            return errorCar;
+            log.error("Code 400 - Car ID must be greater than 0");
+            return new Car(9999, "000", "000", 9999);
         }
         cars.add(car);
-        log.info("Car posted successfully");
+        log.info("Code 200 - Car posted successfully");
         return car;
     }
 
     /**
-     * Замена существующего автомобиля, если id не найден, то создаем новый
+     * Замена существующего автомобиля, если ID не найден, то создаем новый
      *
-     * @param id
-     * @param car
+     * @param id  ID машины, которую нужно изменить
+     * @param car новые данные машины
      * @return созданный или найденный автомобиль
      */
+    @Operation(
+            summary = "Change car",
+            description = "Change car data by ID",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Successful"),
+                    @ApiResponse(responseCode = "201", description = "Created")
+            }
+    )
     @PutMapping("/{id}")
     ResponseEntity<Car> putCar(@PathVariable long id, @RequestBody Car car) {
         int carIndex = -1;
@@ -88,7 +129,7 @@ public class RestApiCarController {
             if (carInList.getId() == id) {
                 carIndex = cars.indexOf(carInList);
                 cars.set(carIndex, car);
-                log.info("Car ID: " + carInList.getId() + " has been updated");
+                log.info("Car ID: {} has been updated", carInList.getId());
             }
         }
         return (carIndex == -1)
@@ -97,10 +138,17 @@ public class RestApiCarController {
     }
 
     /**
-     * Удаляем автомобиль по id
+     * Удаляем автомобиль по ID
      *
-     * @param id
+     * @param id id машины, которую нужно удалить
      */
+    @Operation(
+            summary = "Delete car",
+            description = "Delete car by ID",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Successful")
+            }
+    )
     @DeleteMapping("/{id}")
     void deleteCar(@PathVariable long id) {
         log.info("Delete Car with ID {}", id);
