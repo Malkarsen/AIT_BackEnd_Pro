@@ -1,0 +1,21 @@
+clean       очистка артефактов
+validate    проверка структуры, все ли корректно
+compile     компиляция java кода в .class
+test        запускает unit тесты
+package     упаковка в .jar
+verify      проверка все ли тесты выполнились успешно
+install     установка приложения (артефакта) в локальный репозиторий
+site        генерация документации
+deploy      отправка готового артефакта на удаленный репозиторий
+
+Полезные команды:
+1) mvn dependency:tree     просмотр дерева зависимостей
+2)
+3) mvn dependency:analyze
+4) mvn dependency:parge-local-repository полностью очищается все, что находится в папочке локальный репозиторий
+5)
+...
+mvn helper...
+
+mvn clean verify -DskipTests
+mvn surefire:report
