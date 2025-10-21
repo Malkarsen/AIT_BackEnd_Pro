@@ -1,6 +1,7 @@
 package de.ait.training.controller;
 
 import de.ait.training.model.Car;
+import de.ait.training.repository.CarRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,10 +25,11 @@ import java.util.List;
 @RequestMapping("/api/cars")
 @RestController
 public class RestApiCarController {
-    Car carOne = new Car(1, "Black", "BMW x5", 25000);
-    Car carTwo = new Car(2, "Green", "Audi A4", 15000);
-    Car carThree = new Car(3, "White", "BMW A220", 18000);
-    Car carFour = new Car(4, "Red", "Ferrari", 250000);
+    /*
+    Car carOne = new Car(1, "black", "BMW x5", 25000);
+    Car carTwo = new Car(2, "green", "Audi A4", 15000);
+    Car carThree = new Car(3, "white", "MB A220", 18000);
+    Car carFour = new Car(4, "red", "Ferrari", 250000);
 
     List<Car> cars = new ArrayList<>();
 
@@ -36,6 +38,12 @@ public class RestApiCarController {
         cars.add(carTwo);
         cars.add(carThree);
         cars.add(carFour);
+    }*/
+
+    private CarRepository carRepository;
+
+    public RestApiCarController(CarRepository carRepository) {
+        this.carRepository = carRepository;
     }
 
     /**
@@ -53,7 +61,7 @@ public class RestApiCarController {
     )
     @GetMapping
     Iterable<Car> getCars() {
-        return cars;
+        return carRepository.findAll();
     }
 
     /**
@@ -71,9 +79,8 @@ public class RestApiCarController {
     )
     @GetMapping("/color/{color}")
     ResponseEntity<List<Car>> getCarsByColor(@PathVariable String color) {
-        List<Car> filteredCars = cars.stream()
-                .filter(car -> car.getColor().equalsIgnoreCase(color))
-                .toList();
+        List<Car> filteredCars = carRepository.findCarByColorIgnoreCase(color);
+
         if (filteredCars.isEmpty()) {
             log.warn("Code 404 - No cars found for color {}", color);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -100,9 +107,9 @@ public class RestApiCarController {
     Car postCar(@RequestBody Car car) {
         if (car.getId() <= 0) {
             log.error("Code 400 - Car ID must be greater than 0");
-            return new Car(9999, "000", "000", 9999);
+            return new Car("000", "000", 9999);
         }
-        cars.add(car);
+        carRepository.save(car);
         log.info("Code 200 - Car posted successfully");
         return car;
     }
@@ -119,20 +126,22 @@ public class RestApiCarController {
             description = "Change car data by ID",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Successful"),
-                    @ApiResponse(responseCode = "201", description = "Created")
+                    @ApiResponse(responseCode = "201", description = "Created"),
+                    @ApiResponse(responseCode = "404", description = "Not found")
             }
     )
     @PutMapping("/{id}")
     ResponseEntity<Car> putCar(@PathVariable long id, @RequestBody Car car) {
-        int carIndex = -1;
-        for (Car carInList : cars) {
-            if (carInList.getId() == id) {
-                carIndex = cars.indexOf(carInList);
-                cars.set(carIndex, car);
-                log.info("Car ID: {} has been updated", carInList.getId());
-            }
+        Car foundCar = carRepository.findById(id).orElse(null);
+
+        if (foundCar == null) {
+            log.info("Code 404 - Car not found for id {}", id);
+        } else {
+            log.info("Code 200 - Car found for id {}", id);
+            carRepository.save(car);
         }
-        return (carIndex == -1)
+
+        return (foundCar == null)
                 ? new ResponseEntity<>(postCar(car), HttpStatus.CREATED)
                 : new ResponseEntity<>(car, HttpStatus.OK);
     }
@@ -152,6 +161,6 @@ public class RestApiCarController {
     @DeleteMapping("/{id}")
     void deleteCar(@PathVariable long id) {
         log.info("Delete Car with ID {}", id);
-        cars.removeIf(car -> car.getId() == id);
+        carRepository.deleteById(id);
     }
 }
