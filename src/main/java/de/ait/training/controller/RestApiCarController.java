@@ -25,21 +25,6 @@ import java.util.List;
 @RequestMapping("/api/cars")
 @RestController
 public class RestApiCarController {
-    /*
-    Car carOne = new Car(1, "black", "BMW x5", 25000);
-    Car carTwo = new Car(2, "green", "Audi A4", 15000);
-    Car carThree = new Car(3, "white", "MB A220", 18000);
-    Car carFour = new Car(4, "red", "Ferrari", 250000);
-
-    List<Car> cars = new ArrayList<>();
-
-    public RestApiCarController() {
-        cars.add(carOne);
-        cars.add(carTwo);
-        cars.add(carThree);
-        cars.add(carFour);
-    }*/
-
     private CarRepository carRepository;
 
     public RestApiCarController(CarRepository carRepository) {
@@ -48,6 +33,8 @@ public class RestApiCarController {
 
     /**
      * GET /api/cars
+     * Получаем список всех автомобилей
+     * (или пустой список, если ничего не найдено)
      *
      * @return список всех автомобилей
      */
@@ -66,6 +53,8 @@ public class RestApiCarController {
 
     /**
      * GET /api/cars/color/{color}
+     * Получаем список автомобилей с заданным цветом
+     * (или пустой список, если ничего не найдено)
      *
      * @return список всех автомобилей заданного цвета
      */
@@ -85,7 +74,107 @@ public class RestApiCarController {
             log.warn("Code 404 - No cars found for color {}", color);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
-            log.info("Code 200 - Cars found for color {}", color);
+            log.info("Code 200 - {} Cars found for color {}", filteredCars.size(), color);
+            return new ResponseEntity<>(filteredCars, HttpStatus.OK);
+        }
+    }
+
+    /**
+     * GET /api/cars/price/between/{min}/{max}
+     * Получаем список автомобилей, у которых цена входит в заданный диапазон
+     * (или пустой список, если ничего не найдено)
+     *
+     * @param min минимальная цена
+     * @param max максимальная цена
+     * @return все автомобили, у которых price находится включительно между min и max
+     */
+    @Operation(
+            summary = "Get cars by price between min and max",
+            description = "Returns a list of cars whose price is inclusive between min and max",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Found"),
+                    @ApiResponse(responseCode = "400", description = "Bad request"),
+                    @ApiResponse(responseCode = "404", description = "Not found"),
+            }
+    )
+    @GetMapping("/price/between/{min}/{max}")
+    ResponseEntity<List<Car>> getCarsByPriceBetween(@PathVariable Double min, @PathVariable Double max) {
+        if (min > max) {
+            log.error("Code 400 - The max ({}) value must be greater than the min value ({})",
+                    max, min);
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.BAD_REQUEST);
+        }
+
+        List<Car> filteredCars = carRepository.findByPriceBetween(min, max);
+        if (filteredCars.isEmpty()) {
+            log.warn("Code 404 - No cars were found for the range from {} to {}",
+                    min, max);
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.NOT_FOUND);
+        } else {
+            log.info("Code 200 - {} Cars were found for the range from {} to {}",
+                    filteredCars.size(), min, max);
+            return new ResponseEntity<>(filteredCars, HttpStatus.OK);
+        }
+    }
+
+    /**
+     * GET /api/cars/price/under/{max}
+     * Получаем список автомобилей, у которых цена меньше, чем заданная, или равна ей
+     * (или пустой список, если ничего не найдено)
+     *
+     * @param max максимальная цена
+     * @return все автомобили, у которых price ≤ max
+     */
+    @Operation(
+            summary = "Get cars by price less than or equal to max",
+            description = "Returns a list of cars with price less than or equal to max",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Found"),
+                    @ApiResponse(responseCode = "404", description = "Not found")
+            }
+    )
+    @GetMapping("/price/under/{max}")
+    ResponseEntity<List<Car>> getCarsByPriceLessThanEqual(@PathVariable Double max) {
+        List<Car> filteredCars = carRepository.findByPriceLessThanEqual(max);
+
+        if (filteredCars.isEmpty()) {
+            log.warn("Code 404 - No cars with a price less than or equal to {} were found",
+                    max);
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.NOT_FOUND);
+        } else {
+            log.info("Code 200 - {} Cars with a price less than or equal to {} were found",
+                    filteredCars.size(), max);
+            return new ResponseEntity<>(filteredCars, HttpStatus.OK);
+        }
+    }
+
+    /**
+     * GET /api/cars/price/between/over/{min}
+     * Получаем список автомобилей, у которых цена больше, чем заданная, или равна ей
+     * (или пустой список, если ничего не найдено)
+     *
+     * @param min минимальная цена
+     * @return все автомобили, у которых price ≥ min
+     */
+    @Operation(
+            summary = "Get cars by price greater than or equal to min",
+            description = "Returns a list of cars with price greater than or equal to min",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Found"),
+                    @ApiResponse(responseCode = "404", description = "Not found")
+            }
+    )
+    @GetMapping("/price/over/{min}")
+    ResponseEntity<List<Car>> getCarsByPriceGreaterThanEqual(@PathVariable Double min) {
+        List<Car> filteredCars = carRepository.findByPriceGreaterThanEqual(min);
+
+        if (filteredCars.isEmpty()) {
+            log.warn("Code 404 - No cars with a price greater than or equal to {} were found",
+                    min);
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.NOT_FOUND);
+        } else {
+            log.info("Code 200 - {} Cars with a price greater than or equal to {} were found",
+                    filteredCars.size(), min);
             return new ResponseEntity<>(filteredCars, HttpStatus.OK);
         }
     }
@@ -107,7 +196,7 @@ public class RestApiCarController {
     Car postCar(@RequestBody Car car) {
         if (car.getId() <= 0) {
             log.error("Code 400 - Car ID must be greater than 0");
-            return new Car("000", "000", 9999);
+            return new Car("000", "000", 9999.0);
         }
         carRepository.save(car);
         log.info("Code 200 - Car posted successfully");

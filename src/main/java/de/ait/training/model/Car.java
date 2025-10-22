@@ -23,9 +23,9 @@ public class Car {
     @Column(nullable = false)
     private String model;
     @Column(nullable = false)
-    private double price;
+    private Double price;
 
-    public Car(String color, String model, double price) {
+    public Car(String color, String model, Double price) {
         this.color = color;
         this.model = model;
         this.price = price;
