@@ -105,7 +105,7 @@ public class RestApiCarController {
             return new ResponseEntity<>(new ArrayList<>(), HttpStatus.BAD_REQUEST);
         }
 
-        List<Car> filteredCars = carRepository.findByPriceBetween(min, max);
+        List<Car> filteredCars = carRepository.findCarByPriceBetween(min, max);
         if (filteredCars.isEmpty()) {
             log.warn("Code 404 - No cars were found for the range from {} to {}",
                     min, max);
@@ -135,7 +135,7 @@ public class RestApiCarController {
     )
     @GetMapping("/price/under/{max}")
     ResponseEntity<List<Car>> getCarsByPriceLessThanEqual(@PathVariable Double max) {
-        List<Car> filteredCars = carRepository.findByPriceLessThanEqual(max);
+        List<Car> filteredCars = carRepository.findCarByPriceLessThanEqual(max);
 
         if (filteredCars.isEmpty()) {
             log.warn("Code 404 - No cars with a price less than or equal to {} were found",
@@ -166,7 +166,7 @@ public class RestApiCarController {
     )
     @GetMapping("/price/over/{min}")
     ResponseEntity<List<Car>> getCarsByPriceGreaterThanEqual(@PathVariable Double min) {
-        List<Car> filteredCars = carRepository.findByPriceGreaterThanEqual(min);
+        List<Car> filteredCars = carRepository.findCarByPriceGreaterThanEqual(min);
 
         if (filteredCars.isEmpty()) {
             log.warn("Code 404 - No cars with a price greater than or equal to {} were found",
