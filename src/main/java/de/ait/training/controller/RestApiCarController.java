@@ -72,7 +72,7 @@ public class RestApiCarController {
 
         if (filteredCars.isEmpty()) {
             log.warn("Code 404 - No cars found for color {}", color);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.NOT_FOUND);
         } else {
             log.info("Code 200 - {} Cars found for color {}", filteredCars.size(), color);
             return new ResponseEntity<>(filteredCars, HttpStatus.OK);
