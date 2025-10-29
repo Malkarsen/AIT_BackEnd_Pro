@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
@@ -180,6 +181,7 @@ public class RestApiCarController {
     }
 
     /**
+     * POST /api/cars
      * Создает новый автомобиль и добавляет его в лист
      *
      * @param car данные для новой машины
@@ -189,17 +191,19 @@ public class RestApiCarController {
             summary = "Create car",
             description = "Create a new car",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Created")
+                    @ApiResponse(responseCode = "201", description = "Created")
             }
     )
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     Car postCar(@RequestBody Car car) {
-        if (car.getId() <= 0) {
-            log.error("Code 400 - Car ID must be greater than 0");
-            return new Car("000", "000", 9999.0);
-        }
+        car.setId(null);
+//        if (car.getId() <= 0) {
+//            log.error("Code 400 - Car ID must be greater than 0");
+//            return new Car("000", "000", 9999.0);
+//        }
         carRepository.save(car);
-        log.info("Code 200 - Car posted successfully");
+        log.info("Code 201 - Car posted successfully");
         return car;
     }
 

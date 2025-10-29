@@ -14,7 +14,7 @@ public class Car {
 
     @Column(nullable = false) // при попытке сохранить Null будет ошибка
     private String color;
-    @Column(nullable = false)
+    @Column(nullable = false) // задать имя в бд <, name = "brand">
     private String model;
     @Column(nullable = false)
     private double price;
