@@ -124,4 +124,34 @@ class RestApiCarControllerTestITPostgres {
         assertEquals(savedCar.getPrice(), testCar.getPrice(), "Saved car price is incorrect");
     }
 
+    @Test
+    void putCarSuccess() {
+        HttpHeaders header = new HttpHeaders();
+
+        Car testCar = new Car("Test color", "Test model", 1000.0);
+        long id = 5L;
+
+        HttpEntity<Car> request = new HttpEntity<>(testCar, header);
+
+        // Задание URL
+        // Вариант 1: String.format
+//        String url = String.format("/api/cars/%d", id);
+//        ResponseEntity<Car> response = restTemplate.exchange(
+//                url, HttpMethod.PUT, request, Car.class);
+
+        // Вариант 2: Spring Boot переменные
+        ResponseEntity<Car> response = restTemplate.exchange(
+                "/api/cars/{id}", HttpMethod.PUT, request, Car.class, id
+        );
+
+        assertEquals(HttpStatus.OK, response.getStatusCode(), "Unexpected http status");
+
+        Car modifiedCar = response.getBody();
+        assertNotNull(modifiedCar, "Modified car car should not be null");
+        assertEquals(id, modifiedCar.getId(), "Modified car id is incorrect");
+        assertEquals(testCar.getColor(), modifiedCar.getColor(), "Modified car color is incorrect");
+        assertEquals(testCar.getModel(), modifiedCar.getModel(), "Modified car model is incorrect");
+        assertEquals(testCar.getPrice(), modifiedCar.getPrice(), "Modified car price is incorrect");
+    }
+
 }
