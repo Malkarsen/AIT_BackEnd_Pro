@@ -154,4 +154,50 @@ class RestApiCarControllerTestITPostgres {
         assertEquals(testCar.getPrice(), modifiedCar.getPrice(), "Modified car price is incorrect");
     }
 
+    // 
+    @Test
+    void getAllCarsWithAuthExample() {
+        // Рассмотрим 2 варианта отправки тестового запроса:
+        // 1. Если авторизация базовая (логин/пароль)
+        // 2. Если авторизация на токенах (JWT - JSON Web Token)
+
+        // Базовая авторизация
+        // Допусти, в приложении у нас есть пользователь с логином test_login и паролем 111
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth("test_login", "111");
+
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+
+        ResponseEntity<Car[]> response = restTemplate.exchange(
+                "/api/cars", HttpMethod.GET, request, Car[].class
+        );
+
+        // Некоторые примеры тестовых кейсов:
+        // 1. Позитивный вариант
+        //      а) вкладываем в запрос верные логин и пароль
+        //      б) проверяем, что сервер вернул статус 200 ОК
+        //      в) проверяем, что тело ответа ожидаемое
+        // 2. Негативный вариант
+        //      а) вкладываем в запрос заведомо неверный пароль
+        //      б) проверяем, что сервер вернул статус 401 UNAUTHORIZED
+        //      в) проверяем, что тело пустое (сервер не дал данных)
+        // 3. Негативный вариант
+        //      а) вкладываем в запрос верные логин и пароль, но того пользователя,
+        //      который не имеет прав именно на это действие
+        //      б) проверяем, что сервер вернул статус 403 FORBIDDEN
+        //      в) проверяем, что тело пустое (сервер не дал данных)
+
+        // Авторизация на токенах
+        // Грубый пример токена
+        String token = "$2fghjkvbnmhjwdbnm,hjk3hjk5bnm3bnm3bnmbnm";
+        HttpHeaders headers1 = new HttpHeaders();
+
+        // Добавление токена авторизации в куки запроса
+        headers1.add(HttpHeaders.COOKIE, "Token=" + token);
+
+        HttpEntity<Void> request1 = new HttpEntity<>(headers1);
+
+        // А дальше - по тому же сценарию - отправляем запрос, получаем ответ, все проверяем
+    }
+
 }
