@@ -231,6 +231,7 @@ public class RestApiCarController {
             log.info("Code 404 - Car not found for id {}", id);
         } else {
             log.info("Code 200 - Car found for id {}", id);
+            car.setId(id);
             carRepository.save(car);
         }
 
