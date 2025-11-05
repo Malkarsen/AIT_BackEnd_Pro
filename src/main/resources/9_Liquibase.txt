@@ -1,0 +1,4 @@
+changeSet маленькая миграция
+changeLog набор миграций
+
+mvn liquibase:update
