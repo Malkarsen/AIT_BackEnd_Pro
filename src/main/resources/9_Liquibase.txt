@@ -1,4 +1,17 @@
 changeSet маленькая миграция
 changeLog набор миграций
 
+# Применить все новые миграции
 mvn liquibase:update
+
+# Проверить, какие изменения ещё не применены
+mvn liquibase:status
+
+# Посмотреть историю изменений
+mvn liquibase:history
+
+# Сгенерировать SQL без применения
+mvn liquibase:updateSQL
+
+# Откатить последнее изменение
+mvn liquibase:rollbackCount -Dliquibase.rollbackCount=1
