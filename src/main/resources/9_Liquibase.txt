@@ -14,4 +14,4 @@ mvn liquibase:history
 mvn liquibase:updateSQL
 
 # Откатить последнее изменение
-mvn liquibase:rollbackCount -Dliquibase.rollbackCount=1
+mvn liquibase:rollback "-Dliquibase.rollbackCount=1"
