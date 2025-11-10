@@ -1,0 +1,33 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+      http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.17.xsd">
+
+    <changeSet id="4-insert-2-simple-cars" author="arina">
+        <insert tableName="cars">
+            <column name="color" value="black" />
+            <column name="model" value="BMW x5" />
+            <column name="price" value="3000" />
+            <column name="year" value="2000" />
+            <column name="engine_type" value="petrol" />
+        </insert>
+
+        <insert tableName="cars">
+            <column name="color" value="red" />
+            <column name="model" value="Audi A4" />
+            <column name="price" value="40000" />
+            <column name="year" value="2025" />
+            <column name="engine_type" value="diesel" />
+        </insert>
+
+        <rollback>
+            <delete tableName="cars">
+                <where>
+                    model IN ('BMW X5', 'Audi A6')
+                </where>
+            </delete>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>
