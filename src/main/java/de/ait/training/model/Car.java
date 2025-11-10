@@ -20,6 +20,8 @@ public class Car {
     private double price;
     @Column(nullable = false)
     private int year;
+    @Column(nullable = false, name = "engine_type")
+    private int engineType;
 
     public Car(String color, String model, double price) {
         this.color = color;
