@@ -10,5 +10,6 @@
     <include file="db.changelog-2.0-add-column-year.xml" relativeToChangelogFile="true"/>
     <include file="db.changelog-3.0-add-column-engine-type.xml" relativeToChangelogFile="true"/>
     <include file="db.changelog-4.0-insert-simple-cars.xml" relativeToChangelogFile="true"/>
+    <include file="db.changelog-5.0-add-column-image-url.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>
